@@ -96,7 +96,7 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Aws.Core\Aws.Core.csproj">
-      <Project>{5CDA993D-A59E-41F6-833E-71A8DAABCDB8}</Project>
+      <Project>{5cda993d-a59e-41f6-833e-71a8daabcdb8}</Project>
       <Name>Aws.Core</Name>
     </ProjectReference>
   </ItemGroup>

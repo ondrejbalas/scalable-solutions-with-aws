@@ -36,7 +36,7 @@ namespace Aws.Core.AwsCallers
             var regionEndpoint = region.ToAwsRegionEndpoint();
 
             // Get an Ec2Client for the current region
-            var client = ec2Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonEC2Client(credentials, regionEndpoint));
+            var client = ec2Clients.GetOrAdd(region, r => new AmazonEC2Client(credentials, regionEndpoint));
 
             // Get instances within the region
             // Start by creating the request
@@ -65,7 +65,7 @@ namespace Aws.Core.AwsCallers
             var regionEndpoint = region.ToAwsRegionEndpoint();
 
             // Get an Ec2Client for the current region
-            var client = ec2Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonEC2Client(credentials, regionEndpoint));
+            var client = ec2Clients.GetOrAdd(region, r => new AmazonEC2Client(credentials, regionEndpoint));
 
             // Find the VPC ID for this region
             var vpcId = client.DescribeVpcs().Vpcs.Single().VpcId;
@@ -118,7 +118,8 @@ namespace Aws.Core.AwsCallers
 
         public static string GetAmiId(IAmazonEC2 client, string amiName)
         {
-            return client.DescribeImages().Images.Single(x => x.Name == amiName).ImageId;
+            var images = client.DescribeImages(new DescribeImagesRequest() { Filters = new List<Filter>() { new Filter("name", new List<string>() { amiName }) } });
+            return images.Images.Single().ImageId;
         }
 
         public void LaunchInstance(AwsRegionLocations region, Action<AwsRegionLocations> instanceLaunched)
@@ -158,7 +159,7 @@ namespace Aws.Core.AwsCallers
 
         private string FindNewestInstanceId(AwsRegionLocations region)
         {
-            var client = ec2Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
+            var client = ec2Clients.GetOrAdd(region, r => new AmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
 
             // Get instances within the region
             // Start by creating the request
@@ -184,7 +185,7 @@ namespace Aws.Core.AwsCallers
 
         private void TerminateInstance(AwsRegionLocations region, string instanceId)
         {
-            var client = ec2Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
+            var client = ec2Clients.GetOrAdd(region, r => new AmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
 
             var deleteRequest = new TerminateInstancesRequest()
             {
@@ -197,7 +198,7 @@ namespace Aws.Core.AwsCallers
         private void CreateAndLaunchInstance(AwsRegionLocations region)
         {
             // Get an Ec2Client for the current region
-            var client = ec2Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
+            var client = ec2Clients.GetOrAdd(region, r => new AmazonEC2Client(credentials, region.ToAwsRegionEndpoint()));
 
             var securityGroupId = EnsureSecurityGroupExists(region);
             var availableSubnets = client.DescribeSubnets().Subnets.OrderByDescending(x => x.AvailableIpAddressCount);

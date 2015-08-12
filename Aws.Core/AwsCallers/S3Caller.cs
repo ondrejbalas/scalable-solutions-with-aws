@@ -25,7 +25,7 @@ namespace Aws.Core.AwsCallers
             var regionEndpoint = region.ToAwsRegionEndpoint();
 
             // Get an Ec2Client for the current region
-            var client = s3Clients.GetOrAdd(region, r => AWSClientFactory.CreateAmazonS3Client(credentials, regionEndpoint));
+            var client = s3Clients.GetOrAdd(region, r => new AmazonS3Client(credentials, regionEndpoint));
 
             // download the data
             using (var stream = client.GetObject(bucketName, keyName).ResponseStream)

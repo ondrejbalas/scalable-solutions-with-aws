@@ -34,7 +34,7 @@ namespace Aws
 
         static void GetInstances(AWSCredentials credentials)
         {
-            IAmazonEC2 client = AWSClientFactory.CreateAmazonEC2Client(credentials, RegionEndpoint.USEast1);
+            IAmazonEC2 client = new AmazonEC2Client(credentials, RegionEndpoint.USEast1);
 
             DescribeInstancesRequest request = new DescribeInstancesRequest();
             request.Filters.Add(new Filter("instance-state-code", new List<string>() { "0", "16" }));
@@ -76,29 +76,29 @@ namespace Aws
 
         static void WriteToSimpleDb(AWSCredentials credentials)
         {
-            var client = new AmazonSimpleDBClient(credentials, RegionEndpoint.USEast1);
+            AmazonSimpleDBClient client = new AmazonSimpleDBClient(credentials, RegionEndpoint.USEast1);
 
-            var request = new CreateDomainRequest("aws-talk");
-            var response = client.CreateDomain(request);
+            CreateDomainRequest request = new CreateDomainRequest("aws-talk");
+            CreateDomainResponse response = client.CreateDomain(request);
 
-            var putData = new PutAttributesRequest("aws-talk", "products/" + Guid.NewGuid().ToString(),
+            PutAttributesRequest putData = new PutAttributesRequest("aws-talk", "products/" + Guid.NewGuid().ToString(),
                 new List<ReplaceableAttribute>()
-                {
-                    new ReplaceableAttribute("Name", "Couch", true),
-                    new ReplaceableAttribute("Price", "20", true)
-                });
+                    {
+                        new ReplaceableAttribute("Name", "Couch", true),
+                        new ReplaceableAttribute("Price", "20", true)
+                    });
             client.PutAttributes(putData);
         }
 
         static void ReadFromSimpleDb(AWSCredentials credentials)
         {
-            var client = new AmazonSimpleDBClient(credentials, RegionEndpoint.USEast1);
+            AmazonSimpleDBClient client = new AmazonSimpleDBClient(credentials, RegionEndpoint.USEast1);
 
             // attribute names are case sensitive
             // comparisons are lexicographical. no numeric comparisons exist
-            var request = new SelectRequest("select * from `aws-talk` WHERE `Price` > '01'");
-            var response = client.Select(request);
-            foreach (var item in response.Items)
+            SelectRequest request = new SelectRequest("select * from `aws-talk` WHERE `Price` > '01'");
+            SelectResponse response = client.Select(request);
+            foreach (Item item in response.Items)
             {
                 Console.WriteLine("Item {0} has attributes: {1}",
                     item.Name, String.Join(" ; ", item.Attributes.Select(a => string.Format("{0}={1}", a.Name, a.Value))));
